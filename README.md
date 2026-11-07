@@ -242,7 +242,8 @@ app/
   validate.py   JSON salvage and checks against real lines
   pipeline.py   prepare, analyze a slice, fold it into the ledger
   report.py     grouping, triage, judge, guard rails, severity policy
-static/index.html   single-page UI
+static/index.html   single-page UI (Catppuccin Mocha)
+static/fonts/       Geist and Geist Mono, bundled so the UI works offline
 scripts/        setup, start_model, bench, bench_cache, try_chunks, eval, web_smoke
 eval/           expected answers and the second-log generator
 tests/          unit tests that run without a model
@@ -261,3 +262,5 @@ tests/          unit tests that run without a model
 ### License
 
 No license file yet. Add one, such as MIT, before you publish the repository.
+
+The bundled Geist fonts ship under the SIL Open Font License; the license text sits in `static/fonts/Geist-LICENSE.txt`.

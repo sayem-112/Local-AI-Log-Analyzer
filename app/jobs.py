@@ -108,7 +108,9 @@ class Runner:
         self.thread.start()
 
     def submit(self, job_id: str) -> None:
-        self.store.update(job_id, status="queued", stage="waiting", error=None, cancel=0)
+        # A user (re)start resets the clock; resume after an app restart (start()) keeps it.
+        self.store.update(job_id, status="queued", stage="waiting", error=None, cancel=0,
+                          started_at=None, finished_at=None)
         self.q.put(job_id)
 
     def _loop(self) -> None:

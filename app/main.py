@@ -5,6 +5,7 @@ Run: uvicorn app.main:app --port 8000   (llama-server must be running, see READM
 from __future__ import annotations
 
 import json
+import mimetypes
 import os
 import time
 from contextlib import asynccontextmanager
@@ -13,12 +14,14 @@ from pathlib import Path
 import psutil
 from fastapi import FastAPI, HTTPException, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from . import config
 from .jobs import Runner, Store
 from .logparse import index_entries
 
 STATIC = config.ROOT / "static"
+mimetypes.add_type("font/woff2", ".woff2")  # Windows' registry lacks it; serve fonts with the right type
 store: Store
 runner: Runner
 
@@ -33,7 +36,8 @@ async def lifespan(_app: FastAPI):
     yield
 
 
-app = FastAPI(title="Local AI Security Log Analyzer", lifespan=lifespan)
+app = FastAPI(title="traceLog", lifespan=lifespan)
+app.mount("/static", StaticFiles(directory=STATIC), name="static")  # bundled fonts: works offline
 
 
 @app.get("/")
@@ -117,10 +121,8 @@ def report_download(job_id: str):
 
 @app.get("/api/system")
 def system():
-    me = psutil.Process()
-    backend = me.memory_info().rss
-    model_rss = sum(p.info["memory_info"].rss for p in psutil.process_iter(["name", "memory_info"])
-                    if p.info["name"] and p.info["name"].lower().startswith("llama-server") and p.info["memory_info"])
+    backend = psutil.Process().memory_info().rss
+    model_rss = _model_rss()
     return {
         "model_online": runner.llm.healthy(),
         "model": runner.llm.model_name(),
@@ -131,6 +133,26 @@ def system():
         "ram_limit_mb": 4096,
         "busy_job": runner.current,
     }
+
+
+_model_proc: psutil.Process | None = None
+
+
+def _model_rss() -> int:
+    """RSS of llama-server. Scanning every process takes ~0.5 s on Windows, so the
+    process handle is cached and only looked up again if that process exits."""
+    global _model_proc
+    try:
+        if _model_proc is not None and _model_proc.is_running():
+            return _model_proc.memory_info().rss
+    except psutil.Error:
+        pass
+    _model_proc = next((p for p in psutil.process_iter(["name"])
+                        if (p.info["name"] or "").lower().startswith("llama-server")), None)
+    try:
+        return _model_proc.memory_info().rss if _model_proc else 0
+    except psutil.Error:
+        return 0
 
 
 def _get(job_id: str) -> dict:

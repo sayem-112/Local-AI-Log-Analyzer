@@ -1,0 +1,80 @@
+{
+ "_note": "Answers for eval/apache_test.log (generated). Test fixture only.",
+ "expected": [
+  {
+   "name": "credential attack -> login -> bulk export",
+   "actor": "198.51.100.23",
+   "types": [
+    "brute_force",
+    "account_compromise",
+    "data_exfiltration"
+   ],
+   "must_lines": [
+    7,
+    96,
+    101
+   ],
+   "nice_lines": [
+    105
+   ],
+   "severity": [
+    "C"
+   ]
+  },
+  {
+   "name": "SQL injection with server errors",
+   "actor": "192.0.2.200",
+   "types": [
+    "sql_injection"
+   ],
+   "must_lines": [
+    62,
+    63
+   ],
+   "nice_lines": [
+    61
+   ],
+   "severity": [
+    "H",
+    "C"
+   ]
+  },
+  {
+   "name": "scanner (Nikto)",
+   "actor": "203.0.113.66",
+   "types": [
+    "scanning",
+    "unauthorized_access",
+    "path_traversal"
+   ],
+   "must_lines": [
+    34,
+    35
+   ],
+   "nice_lines": [
+    36,
+    37,
+    38,
+    39,
+    40,
+    41
+   ],
+   "severity": [
+    "L",
+    "M"
+   ]
+  }
+ ],
+ "benign_actors": [
+  "192.0.2.31"
+ ],
+ "benign_lines": [
+  76,
+  77,
+  84,
+  85,
+  86,
+  87,
+  88
+ ]
+}

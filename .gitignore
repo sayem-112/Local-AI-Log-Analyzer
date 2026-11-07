@@ -1,0 +1,11 @@
+# downloaded during setup (see README)
+bin/
+models/
+.venv/
+
+# runtime data: uploads, job database, dev reports
+data/
+
+__pycache__/
+*.pyc
+.pytest_cache/

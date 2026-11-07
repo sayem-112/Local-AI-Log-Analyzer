@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Log Analyzer</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #ffffff; --text: #1b1f24; --muted: #5d6673; --line: #e2e5ea;
+    --accent: #2457d6; --ok: #1a7340; --warn: #b7791f; --bad: #c53030;
+    --crit: #8b1a1a; --high: #c53030; --med: #8a5a12; --low: #4a6fa5; --chip: #eef0f3;
+    --mono: ui-monospace, SFMono-Regular, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #111418; --panel: #191d23; --text: #e6e9ee; --muted: #9aa3ae; --line: #2a3038;
+            --accent: #6b93ff; --on-accent: #0b1530; --chip: #232931; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, sans-serif; }
+  header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;
+           padding: 14px 20px; border-bottom: 1px solid var(--line); background: var(--panel); }
+  h1 { font-size: 17px; margin: 0; }
+  h2 { font-size: 15px; margin: 0 0 12px; }
+  main { max-width: 1040px; margin: 0 auto; padding: 20px 16px 60px; display: grid; gap: 16px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .muted { color: var(--muted); }
+  .pill { font-size: 13px; padding: 3px 10px; border-radius: 99px; background: var(--chip); }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; background: var(--bad); }
+  .dot.on { background: var(--ok); }
+  button { font: inherit; padding: 7px 14px; border-radius: 7px; border: 1px solid var(--line);
+           background: var(--chip); color: var(--text); cursor: pointer; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent, #fff); }
+  button:disabled { opacity: .5; cursor: default; }
+  .drop { border: 2px dashed var(--line); border-radius: 10px; padding: 22px; text-align: center; cursor: pointer; }
+  .drop.over { border-color: var(--accent); }
+  .err { color: var(--bad); margin-top: 8px; }
+  .bar { height: 8px; background: var(--chip); border-radius: 99px; overflow: hidden; margin: 10px 0; }
+  .bar > div { height: 100%; background: var(--accent); width: 100%; transform: scaleX(0);
+               transform-origin: left; transition: transform .4s; }
+  .chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+  .chip { width: 22px; height: 22px; border-radius: 4px; background: var(--chip); font-size: 10px;
+          display: grid; place-items: center; color: var(--muted); }
+  .chip.done { background: var(--ok); color: #fff; } .chip.failed { background: var(--bad); color: #fff; }
+  .chip.flag { outline: 2px solid var(--warn); outline-offset: 1px; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
+  .stat { background: var(--chip); border-radius: 8px; padding: 8px 10px; }
+  .stat b { display: block; font-size: 18px; }
+  .finding { border: 1px solid var(--line); border-left: 4px solid var(--med); border-radius: 8px; padding: 12px 14px; margin-top: 10px; }
+  .finding.C { border-left-color: var(--crit); } .finding.H { border-left-color: var(--high); }
+  .finding.M { border-left-color: var(--med); } .finding.L { border-left-color: var(--low); }
+  .sev { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 4px; color: #fff; background: var(--med); }
+  .sev.C { background: var(--crit); } .sev.H { background: var(--high); } .sev.L { background: var(--low); }
+  .kv { display: grid; grid-template-columns: 90px 1fr; gap: 2px 10px; margin-top: 8px; font-size: 14px; }
+  .kv dt { color: var(--muted); }
+  .kv dd { margin: 0; overflow-wrap: anywhere; }
+  details { margin-top: 8px; }
+  summary { cursor: pointer; color: var(--accent); font-size: 14px; }
+  pre { font: 12px/1.45 var(--mono); background: var(--chip); padding: 8px; border-radius: 6px;
+        overflow-x: auto; white-space: pre-wrap; overflow-wrap: anywhere; margin: 6px 0 0; }
+  .mono { font-family: var(--mono); font-size: 13px; }
+  .hidden { display: none; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  td, th { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Local AI Security Log Analyzer</h1>
+  <div class="row">
+    <span class="pill"><span id="modelDot" class="dot"></span><span id="modelName">model offline</span></span>
+    <span class="pill" id="ram">RAM –</span>
+  </div>
+</header>
+
+<main>
+  <section class="panel">
+    <h2>1. Upload a log</h2>
+    <label class="drop" id="drop">
+      <input type="file" id="file" accept=".log,.txt" hidden>
+      <span id="dropText">Drop a .log or .txt file here, or click to choose (max 5 MB)</span>
+    </label>
+    <div id="uploadErr" class="err hidden"></div>
+    <div id="fileInfo" class="row hidden" style="margin-top:12px">
+      <span id="fileMeta" class="muted"></span>
+      <button class="primary" id="startBtn">Start analysis</button>
+      <button id="cancelBtn" class="hidden">Cancel</button>
+    </div>
+    <div id="recent" class="muted" style="margin-top:10px;font-size:13px"></div>
+  </section>
+
+  <section class="panel hidden" id="progressPanel">
+    <h2>2. Progress</h2>
+    <div class="row"><b id="stage"></b><span class="muted" id="timing"></span></div>
+    <div class="bar"><div id="barFill"></div></div>
+    <div class="muted" id="budget" style="font-size:13px"></div>
+    <div class="chips" id="chips"></div>
+    <details id="partsDetails"><summary>Per-part details (tokens, time, memory carried, rejected model output)</summary>
+      <table id="partsTable"></table>
+    </details>
+  </section>
+
+  <section class="panel hidden" id="reportPanel">
+    <div class="row" style="justify-content:space-between"><h2 style="margin:0">3. Report</h2>
+      <a id="download" href="#">Download JSON</a></div>
+    <div class="stats" id="stats" style="margin-top:12px"></div>
+    <div id="failedParts" class="err hidden"></div>
+    <div id="findings"></div>
+    <details id="dismissedBox"><summary id="dismissedTitle">Dismissed signals</summary><div id="dismissed"></div></details>
+  </section>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let jobId = null, pollTimer = null;
+
+// Every piece of log-derived text goes through textContent: log lines can't inject HTML.
+function el(tag, attrs = {}, ...children) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") n.className = v; else n.setAttribute(k, v);
+  }
+  for (const c of children) n.append(c instanceof Node ? c : document.createTextNode(String(c ?? "")));
+  return n;
+}
+
+async function api(path, opts) {
+  const r = await fetch(path, opts);
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(body.detail || `Request failed (${r.status})`);
+  return body;
+}
+
+// ---- upload ----
+const drop = $("drop"), fileInput = $("file");
+drop.addEventListener("dragover", (e) => { e.preventDefault(); drop.classList.add("over"); });
+drop.addEventListener("dragleave", () => drop.classList.remove("over"));
+drop.addEventListener("drop", (e) => { e.preventDefault(); drop.classList.remove("over");
+  if (e.dataTransfer.files[0]) upload(e.dataTransfer.files[0]); });
+fileInput.addEventListener("change", () => fileInput.files[0] && upload(fileInput.files[0]));
+
+async function upload(file) {
+  $("uploadErr").classList.add("hidden");
+  $("dropText").textContent = `Uploading ${file.name}…`;
+  const fd = new FormData(); fd.append("file", file);
+  try {
+    const job = await api("/api/jobs", { method: "POST", body: fd });
+    openJob(job);
+  } catch (e) {
+    $("uploadErr").textContent = e.message; $("uploadErr").classList.remove("hidden");
+  } finally {
+    $("dropText").textContent = "Drop a .log or .txt file here, or click to choose (max 5 MB)";
+    fileInput.value = "";
+  }
+}
+
+$("startBtn").onclick = async () => {
+  try { render(await api(`/api/jobs/${jobId}/start`, { method: "POST" })); poll(); }
+  catch (e) { $("uploadErr").textContent = e.message; $("uploadErr").classList.remove("hidden"); }
+};
+$("cancelBtn").onclick = async () => render(await api(`/api/jobs/${jobId}/cancel`, { method: "POST" }));
+
+function openJob(job) {
+  jobId = job.id;
+  $("fileInfo").classList.remove("hidden");
+  $("fileMeta").textContent = `${job.filename} · ${(job.size / 1024).toFixed(1)} KB · ${job.lines} lines · ${job.fmt}`;
+  render(job);
+  if (["queued", "running"].includes(job.status)) poll();
+}
+
+function poll() {
+  clearTimeout(pollTimer);
+  pollTimer = setTimeout(async () => {
+    try {
+      const job = await api(`/api/jobs/${jobId}`);
+      render(job);
+      if (["queued", "running"].includes(job.status)) poll();
+      else loadRecent();
+    } catch { poll(); }
+  }, 1500);
+}
+
+// ---- progress ----
+function render(job) {
+  const running = ["queued", "running"].includes(job.status);
+  $("startBtn").disabled = running;
+  $("startBtn").textContent = job.status === "done" ? "Run again" : (job.status === "failed" || job.status === "cancelled") ? "Resume" : "Start analysis";
+  $("cancelBtn").classList.toggle("hidden", !running);
+
+  if (job.status !== "ready" || job.parts.length) $("progressPanel").classList.remove("hidden");
+  const label = { done: "Done", failed: "Failed", cancelled: "Cancelled" }[job.status];
+  $("stage").textContent = label ? `${label}${job.error ? ": " + job.error : ""}` : (job.stage || job.status);
+  const parts = job.n_parts || 1, judge = job.judge_total || 0;
+  const pct = job.status === "done" ? 100 : Math.round(100 * (job.parts_done + (judge ? job.judge_done : 0)) / (parts + judge || 1));
+  $("barFill").style.transform = `scaleX(${pct / 100})`;
+  const t = [];
+  if (job.elapsed_s != null) t.push(`${job.elapsed_s}s elapsed`);
+  if (job.eta_s && running) t.push(`~${job.eta_s}s left for parts`);
+  if (job.model) t.push(job.model);
+  $("timing").textContent = t.join(" · ");
+  if (job.budget) {
+    const b = job.budget;
+    $("budget").textContent = `Token budget per call: ${b.context} = fixed prompt ${b.fixed_prompt} + memory ≤${b.memory_cap} + log ≤${b.log_per_part} + reply ${b.reply} + safety ${b.safety}`;
+  }
+  $("chips").replaceChildren(...job.parts.map((p) => {
+    const c = el("div", { class: `chip ${p.status} ${p.accepted ? "flag" : ""}`,
+      title: `Part ${p.idx + 1}: L${p.first_line}-L${p.last_line}, ${p.status}` +
+             (p.ms ? `, ${(p.ms / 1000).toFixed(1)}s, ${p.accepted} flags` : "") + (p.error ? `\n${p.error}` : "") }, p.idx + 1);
+    return c;
+  }));
+  const head = el("tr", {}, ...["Part", "Lines", "Status", "Prompt tok (cached)", "Gen tok", "Time", "Flags", "Memory carried in", "Rejected by checks"].map((h) => el("th", {}, h)));
+  $("partsTable").replaceChildren(head, ...job.parts.map((p) => el("tr", {},
+    el("td", {}, p.idx + 1), el("td", {}, `L${p.first_line}-${p.last_line}`),
+    el("td", {}, p.status + (p.split ? " (split)" : "") + (p.attempts > 1 ? ` after ${p.attempts} tries` : "")),
+    el("td", {}, p.prompt_tokens != null ? `${p.prompt_tokens} (${p.cached_tokens})` : ""),
+    el("td", {}, p.gen_tokens ?? ""), el("td", {}, p.ms ? (p.ms / 1000).toFixed(1) + "s" : ""),
+    el("td", {}, p.accepted || ""), el("td", { class: "mono" }, p.memory || ""),
+    el("td", { class: "mono" }, (p.rejected_items || []).map((r) => `${r.t} L${(r.l || []).join(",")}: ${r.why}`).join("\n") || p.error || ""))));
+
+  if (job.report) renderReport(job.report);
+  else $("reportPanel").classList.add("hidden");
+}
+
+// ---- report ----
+function renderReport(rep) {
+  $("reportPanel").classList.remove("hidden");
+  $("download").href = `/api/jobs/${jobId}/report.json`;
+  const s = rep.summary || {};
+  const stat = (v, k) => el("div", { class: "stat" }, el("b", {}, v), el("span", { class: "muted" }, k));
+  $("stats").replaceChildren(
+    stat(rep.findings.length, "findings"), stat(s.lines ?? "–", "log lines"), stat(s.parts ?? "–", "parts"),
+    stat(s.model_calls ?? "–", "model calls"), stat(s.model_ms ? (s.model_ms / 1000).toFixed(0) + "s" : "–", "model time"),
+    stat(`${s.flags_accepted ?? 0}/${(s.flags_accepted ?? 0) + (s.flags_rejected ?? 0)}`, "model flags kept"),
+  );
+  const fp = rep.failed_parts || [];
+  $("failedParts").classList.toggle("hidden", !fp.length);
+  $("failedParts").textContent = fp.length ? `Not analyzed by the model (lines still counted): ` +
+    fp.map((f) => `L${f.lines[0]}-L${f.lines[1]} (${f.error})`).join("; ") : "";
+
+  if (!rep.findings.length) $("findings").replaceChildren(el("p", { class: "muted" }, "No attacks found."));
+  else $("findings").replaceChildren(...rep.findings.map((f) => {
+    const ev = el("pre", {}, f.evidence.map((e) => `L${e.line}  ${e.text}`).join("\n"));
+    return el("div", { class: `finding ${f.severity_code}` },
+      el("div", { class: "row" }, el("span", { class: `sev ${f.severity_code}` }, f.severity),
+        el("b", {}, f.attack_type), el("span", { class: "muted" }, f.id)),
+      el("dl", { class: "kv" },
+        el("dt", {}, "Chain"), el("dd", {}, f.chain.join(" → ")),
+        el("dt", {}, "Source"), el("dd", { class: "mono" }, [f.ips.join(", "), f.users.join(", "), f.sessions.join(", ")].filter(Boolean).join(" · ")),
+        el("dt", {}, "Lines"), el("dd", {}, `${f.evidence.length} lines, L${f.first_line}–L${f.last_line}`),
+        el("dt", {}, "Reason"), el("dd", {}, f.reason),
+        el("dt", {}, "Action"), el("dd", {}, f.action),
+        el("dt", {}, "Decided by"), el("dd", { class: "muted" }, `${f.decided_by} · ${f.model_flags} model flags · facts: ${f.facts.join(" | ")}`)),
+      el("details", {}, el("summary", {}, "Evidence lines"), ev));
+  }));
+  const d = rep.dismissed || [];
+  $("dismissedTitle").textContent = `Dismissed signals (${d.length}): checked and not reported`;
+  $("dismissed").replaceChildren(...d.map((x) => el("p", { class: "mono" },
+    `${x.id}: ${x.reason} [${x.decided_by}] lines ${x.lines.map((n) => "L" + n).join(",")}`)));
+}
+
+// ---- system + recent ----
+async function system() {
+  try {
+    const s = await api("/api/system");
+    $("modelDot").classList.toggle("on", s.model_online);
+    $("modelName").textContent = s.model_online ? s.model : "model offline";
+    $("ram").textContent = `RAM ${s.rss_total_mb} MB of ${s.ram_limit_mb} MB (model ${s.rss_model_mb}, app ${s.rss_backend_mb})`;
+  } catch { $("modelName").textContent = "backend offline"; }
+  setTimeout(system, 3000);
+}
+
+async function loadRecent() {
+  const jobs = await api("/api/jobs").catch(() => []);
+  $("recent").replaceChildren(...(jobs.length ? [document.createTextNode("Recent: ")] : []),
+    ...jobs.slice(0, 6).flatMap((j, i) => {
+      const a = el("a", { href: "#" }, `${j.filename} (${j.status})`);
+      a.onclick = async (e) => { e.preventDefault(); openJob(await api(`/api/jobs/${j.id}`)); };
+      return i ? [document.createTextNode(" · "), a] : [a];
+    }));
+}
+
+system(); loadRecent();
+</script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "_note": "Hand-labelled answers for Cultive8_Workspace_Agrigen_Server.log. Test fixture for scripts/eval.py only; the app never reads this file.",
+  "expected": [
+    {"name": "brute force -> account compromise -> export", "actor": "203.0.113.44",
+     "types": ["brute_force", "account_compromise", "data_exfiltration"],
+     "must_lines": [5, 189, 196], "nice_lines": [198, 201], "severity": ["C"]},
+    {"name": "SQL injection (early and late)", "actor": "203.0.113.72",
+     "types": ["sql_injection"], "must_lines": [29, 222], "nice_lines": [30, 32], "severity": ["M", "H"]},
+    {"name": "scanning -> path traversal -> admin probe", "actor": "203.0.113.90",
+     "types": ["scanning", "path_traversal", "unauthorized_access"],
+     "must_lines": [54, 101], "nice_lines": [56, 99, 102], "severity": ["M", "H"]},
+    {"name": "request burst / rate limit", "actor": "203.0.113.155",
+     "types": ["rate_abuse"], "must_lines": [162], "nice_lines": [159, 170], "severity": ["L", "M", "H"]},
+    {"name": "prompt injection in support message", "actor": "203.0.113.201",
+     "types": ["prompt_injection"], "must_lines": [217], "nice_lines": [], "severity": ["L", "M"]}
+  ],
+  "benign_actors": ["198.51.100.96", "192.0.2.10", "198.51.100.88", "198.51.100.91"],
+  "benign_lines": [11, 41, 42, 45, 84, 119, 120, 135, 136, 137, 138, 140, 147, 207, 210, 211, 238, 239]
+}

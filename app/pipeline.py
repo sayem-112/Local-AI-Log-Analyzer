@@ -8,7 +8,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from . import config
-from .chunker import Chunk, Rendered, chunk_text, plan_chunks, render_all
+from .chunker import Chunk, Rendered, chunk_text, has_content, plan_chunks, render_all
+from .routine import routine_lines
 from .ledger import EventFacts, Flag, Ledger, extract
 from .llm import LLM, LLMError
 from .logparse import Entry, index_entries, read_entry
@@ -37,6 +38,10 @@ def prepare(path: str, llm: LLM) -> Prepared:
     if log_budget < 200:
         raise ValueError(f"token budget too small for log text ({log_budget})")
     rendered = render_all(path, fmt, entries, llm.count, max_entry_tokens=log_budget)
+    if config.FOLD_ROUTINE:
+        fold = routine_lines(path, entries)
+        for r in rendered:
+            r.routine = r.entry.start_line in fold
     return Prepared(path, fmt, entries, rendered, plan_chunks(rendered, log_budget), log_budget, base)
 
 
@@ -70,6 +75,9 @@ def build_messages(prep: Prepared, chunk: Chunk, ledger: Ledger, llm: LLM) -> tu
 
 def analyze_chunk(prep: Prepared, chunk: Chunk, ledger: Ledger, llm: LLM) -> dict:
     """One model call for one part. Returns a JSON-serializable result (saved by jobs.py)."""
+    if not has_content(prep.rendered, chunk):  # only routine traffic: nothing for the model to read
+        return {"accepted": [], "rejected": [], "salvaged": False, "finish_reason": "skipped", "memory": "",
+                "prompt_tokens": 0, "cached_tokens": 0, "gen_tokens": 0, "ms": 0}
     messages, memory, prompt_tokens = build_messages(prep, chunk, ledger, llm)
     reply = llm.chat(messages, CHUNK_SCHEMA, config.REPLY_TOKENS)
     data, salvaged = parse_json(reply.content)

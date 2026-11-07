@@ -63,6 +63,8 @@ async def upload(file: UploadFile):
                 out.write(chunk)
         if size == 0 or not head.strip():
             raise HTTPException(400, "The file is empty.")
+        if head[:2] in (b"\xff\xfe", b"\xfe\xff"):
+            raise HTTPException(400, "This file is UTF-16. Save it as UTF-8 and upload again.")
         if b"\x00" in head:
             raise HTTPException(400, "This looks like a binary file, not a text log.")
         sample = head.decode("utf-8", errors="replace")

@@ -38,7 +38,7 @@ def detect_format(path: str, sample: int = 50) -> str:
             if not s:
                 continue
             seen += 1
-            if s.startswith(b"{"):
+            if s.lstrip(b"\xef\xbb\xbf").startswith(b"{"):
                 json_like += 1
             if seen >= sample:
                 break
@@ -92,7 +92,9 @@ def _has_start_pattern(path: str, sample: int = 50) -> bool:
 
 def _is_entry_start(line: str, fmt: str, has_text_starts: bool) -> bool:
     if fmt == "jsonl":
-        return line.lstrip().startswith("{")
+        # Only indented or closing lines continue a pretty-printed JSON entry; any other
+        # line (junk, a plain-text message) is its own entry instead of corrupting the last one.
+        return not (line[:1].isspace() or line.lstrip("﻿").startswith(("}", "]")))
     if _CONTINUATION.match(line):
         return False
     return bool(_TEXT_START.match(line)) if has_text_starts else True
@@ -112,7 +114,7 @@ def iter_entry_texts(path: str, entries: list[Entry]) -> Iterator[tuple[Entry, s
 
 def try_json(text: str) -> dict | None:
     try:
-        obj = json.loads(text)
+        obj = json.loads(text.lstrip("﻿"))  # a UTF-8 BOM on line 1 must not hide it
     except (ValueError, TypeError):
         return None
     return obj if isinstance(obj, dict) else None

@@ -1,0 +1,82 @@
+Oct 30 09:00:44 web01 nginx[812]: worker process 857 exited on signal 0
+Oct 30 09:01:27 web01 nginx[812]: worker process 880 exited on signal 0
+Oct 30 09:01:52 web01 nginx[812]: worker process 811 exited on signal 0
+Oct 30 09:03:19 web01 CRON[7490]: (root) CMD (/usr/local/bin/backup.sh)
+Oct 30 09:03:42 web01 nginx[812]: worker process 830 exited on signal 0
+Oct 30 09:05:01 web01 sshd[2100]: Failed password for root from 198.51.100.66 port 51000 ssh2
+Oct 30 09:05:58 web01 systemd[1]: Started Session 705 of user www-data.
+Oct 30 09:07:10 web01 kernel: [UFW BLOCK] IN=eth0 OUT= SRC=192.0.2.250 DST=10.0.0.4 PROTO=UDP DPT=123
+Oct 30 09:08:35 web01 systemd[1]: Started Session 824 of user www-data.
+Oct 30 09:09:46 web01 CRON[5735]: (root) CMD (/usr/local/bin/backup.sh)
+Oct 30 09:10:06 web01 CRON[2766]: (root) CMD (/usr/local/bin/backup.sh)
+Oct 30 09:10:53 web01 sshd[2101]: Failed password for root from 198.51.100.66 port 51001 ssh2
+Oct 30 09:11:38 web01 CRON[1857]: (root) CMD (/usr/local/bin/backup.sh)
+Oct 30 09:12:50 web01 CRON[5420]: (root) CMD (/usr/local/bin/backup.sh)
+Oct 30 09:14:09 web01 CRON[2933]: (root) CMD (/usr/local/bin/backup.sh)
+Oct 30 09:15:34 web01 sshd[2698]: Accepted publickey for deploy from 10.0.0.21 port 58326 ssh2
+Oct 30 09:16:18 web01 sshd[2102]: Failed password for root from 198.51.100.66 port 51002 ssh2
+Oct 30 09:17:05 web01 sshd[2392]: Accepted publickey for deploy from 10.0.0.21 port 43817 ssh2
+Oct 30 09:17:51 web01 CRON[1007]: (root) CMD (/usr/local/bin/backup.sh)
+Oct 30 09:18:23 web01 nginx[812]: worker process 882 exited on signal 0
+Oct 30 09:19:25 web01 CRON[1689]: (root) CMD (/usr/local/bin/backup.sh)
+Oct 30 09:20:22 web01 sshd[2103]: Failed password for root from 198.51.100.66 port 51003 ssh2
+Oct 30 09:20:43 web01 systemd[1]: Started Session 176 of user www-data.
+Oct 30 09:22:04 web01 nginx[812]: worker process 816 exited on signal 0
+Oct 30 09:23:03 web01 systemd[1]: Started Session 987 of user www-data.
+Oct 30 09:23:43 web01 systemd[1]: Started Session 937 of user www-data.
+Oct 30 09:24:13 web01 nginx[812]: worker process 861 exited on signal 0
+Oct 30 09:25:05 web01 nginx[812]: worker process 804 exited on signal 0
+Oct 30 09:25:55 web01 sshd[2104]: Failed password for root from 198.51.100.66 port 51004 ssh2
+Oct 30 09:27:21 web01 kernel: [UFW BLOCK] IN=eth0 OUT= SRC=192.0.2.250 DST=10.0.0.4 PROTO=UDP DPT=123
+Oct 30 09:27:50 web01 sshd[2070]: Accepted publickey for deploy from 10.0.0.21 port 44141 ssh2
+Oct 30 09:28:18 web01 CRON[5591]: (root) CMD (/usr/local/bin/backup.sh)
+Oct 30 09:29:00 web01 CRON[5410]: (root) CMD (/usr/local/bin/backup.sh)
+Oct 30 09:30:06 web01 CRON[5619]: (root) CMD (/usr/local/bin/backup.sh)
+Oct 30 09:30:30 web01 systemd[1]: Started Session 561 of user www-data.
+Oct 30 09:30:33 web01 sshd[2400]: Invalid user admin from 203.0.113.77 port 60000
+Oct 30 09:30:36 web01 sshd[2401]: Invalid user test from 203.0.113.77 port 60001
+Oct 30 09:30:39 web01 sshd[2402]: Invalid user oracle from 203.0.113.77 port 60002
+Oct 30 09:30:42 web01 sshd[2403]: Invalid user postgres from 203.0.113.77 port 60003
+Oct 30 09:30:45 web01 sshd[2404]: Invalid user ubuntu from 203.0.113.77 port 60004
+Oct 30 09:30:48 web01 sshd[2405]: Invalid user git from 203.0.113.77 port 60005
+Oct 30 09:30:51 web01 sshd[2406]: Invalid user ftpuser from 203.0.113.77 port 60006
+Oct 30 09:31:13 web01 sshd[2105]: Failed password for root from 198.51.100.66 port 51005 ssh2
+Oct 30 09:31:42 web01 nginx[812]: worker process 802 exited on signal 0
+Oct 30 09:32:11 web01 systemd[1]: Started Session 168 of user www-data.
+Oct 30 09:32:47 web01 CRON[2233]: (root) CMD (/usr/local/bin/backup.sh)
+Oct 30 09:33:10 web01 sshd[2086]: Accepted publickey for deploy from 10.0.0.21 port 55508 ssh2
+Oct 30 09:33:31 web01 nginx[812]: worker process 848 exited on signal 0
+Oct 30 09:34:33 web01 sshd[2092]: Accepted publickey for deploy from 10.0.0.21 port 43787 ssh2
+Oct 30 09:35:42 web01 sshd[2106]: Failed password for root from 198.51.100.66 port 51006 ssh2
+Oct 30 09:37:07 web01 nginx[812]: worker process 810 exited on signal 0
+Oct 30 09:37:56 web01 CRON[1488]: (root) CMD (/usr/local/bin/backup.sh)
+Oct 30 09:39:03 web01 CRON[2849]: (root) CMD (/usr/local/bin/backup.sh)
+Oct 30 09:40:06 web01 systemd[1]: Started Session 246 of user www-data.
+Oct 30 09:40:58 web01 sshd[2913]: Accepted publickey for deploy from 10.0.0.21 port 47912 ssh2
+Oct 30 09:41:46 web01 sshd[2441]: Accepted publickey for deploy from 10.0.0.21 port 46563 ssh2
+Oct 30 09:42:46 web01 sshd[2107]: Failed password for root from 198.51.100.66 port 51007 ssh2
+Oct 30 09:43:41 web01 CRON[3231]: (root) CMD (/usr/local/bin/backup.sh)
+Oct 30 09:44:53 web01 systemd[1]: Started Session 215 of user www-data.
+Oct 30 09:46:10 web01 kernel: [UFW BLOCK] IN=eth0 OUT= SRC=192.0.2.250 DST=10.0.0.4 PROTO=UDP DPT=123
+Oct 30 09:46:35 web01 nginx[812]: worker process 835 exited on signal 0
+Oct 30 09:47:30 web01 sshd[2550]: Failed password for alice from 10.0.0.12 port 50111 ssh2
+Oct 30 09:47:42 web01 sshd[2551]: Accepted password for alice from 10.0.0.12 port 50112 ssh2
+Oct 30 09:48:47 web01 sshd[2108]: Failed password for root from 198.51.100.66 port 51008 ssh2
+Oct 30 09:49:10 web01 systemd[1]: Started Session 756 of user www-data.
+Oct 30 09:50:27 web01 CRON[5364]: (root) CMD (/usr/local/bin/backup.sh)
+Oct 30 09:51:12 web01 systemd[1]: Started Session 745 of user www-data.
+Oct 30 09:52:40 web01 sshd[2182]: Accepted publickey for deploy from 10.0.0.21 port 40352 ssh2
+Oct 30 09:54:09 web01 kernel: [UFW BLOCK] IN=eth0 OUT= SRC=192.0.2.250 DST=10.0.0.4 PROTO=UDP DPT=123
+Oct 30 09:55:35 web01 sshd[2109]: Failed password for root from 198.51.100.66 port 51009 ssh2
+Oct 30 09:56:44 web01 sshd[2810]: Accepted publickey for deploy from 10.0.0.21 port 47337 ssh2
+Oct 30 09:57:52 web01 CRON[3128]: (root) CMD (/usr/local/bin/backup.sh)
+Oct 30 09:58:38 web01 kernel: [UFW BLOCK] IN=eth0 OUT= SRC=192.0.2.250 DST=10.0.0.4 PROTO=UDP DPT=123
+Oct 30 09:59:47 web01 systemd[1]: Started Session 839 of user www-data.
+Oct 30 10:00:18 web01 sshd[2199]: Accepted password for root from 198.51.100.66 port 51099 ssh2
+Oct 30 10:00:58 web01 sudo: root : TTY=pts/0 ; PWD=/root ; USER=root ; COMMAND=/bin/cat /etc/shadow
+Oct 30 10:02:02 web01 CRON[6076]: (root) CMD (/usr/local/bin/backup.sh)
+Oct 30 10:03:15 web01 nginx[812]: worker process 843 exited on signal 0
+Oct 30 10:04:29 web01 CRON[5509]: (root) CMD (/usr/local/bin/backup.sh)
+Oct 30 10:05:49 web01 systemd[1]: Started Session 277 of user www-data.
+Oct 30 10:07:12 web01 sshd[2922]: Accepted publickey for deploy from 10.0.0.21 port 56980 ssh2
+Oct 30 10:08:09 web01 nginx[812]: worker process 867 exited on signal 0

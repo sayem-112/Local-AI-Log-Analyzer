@@ -20,6 +20,19 @@ def test_text_log_groups_stack_traces_and_keeps_line_numbers(tmp_path):
     assert "Traceback" in texts[0] and texts[1].endswith("INFO ok")
 
 
+def test_jsonl_with_bom_and_junk_lines_keeps_every_entry(tmp_path):
+    rows = [json.dumps({"client_ip": "10.0.0.1", "status": 200}) for _ in range(9)]
+    p = tmp_path / "mixed.log"
+    p.write_bytes(b"\xef\xbb\xbf" + "\n".join(rows[:5] + ["junk line ###"] + rows[5:]).encode() + b"\n")
+    fmt, entries = index_entries(str(p))
+    assert fmt == "jsonl"
+    assert [(e.start_line, e.end_line) for e in entries] == [(n, n) for n in range(1, 11)]
+    texts = [t for _, t in iter_entry_texts(str(p), entries)]
+    from app.logparse import try_json
+    assert try_json(texts[0]) is not None  # BOM line still parses
+    assert texts[5] == "junk line ###"     # junk is its own entry, not glued to the JSON above
+
+
 def test_jsonl_sample_has_one_entry_per_line(sample):
     fmt, entries = index_entries(sample)
     assert fmt == "jsonl"

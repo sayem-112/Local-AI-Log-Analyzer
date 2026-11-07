@@ -20,6 +20,9 @@ CTX_TOKENS = _int("CTX_TOKENS", 2048)
 REPLY_TOKENS = _int("REPLY_TOKENS", 300)    # max_tokens for the reply
 MEMORY_TOKENS = _int("MEMORY_TOKENS", 260)  # cap for carried context from earlier parts
 SAFETY_TOKENS = _int("SAFETY_TOKENS", 40)   # slack for tokenizer edge effects
+# Skip routine browser traffic in prompts (app/routine.py). Off by default: it halves model
+# calls on web logs, but denser slices cost one missed attack on the Apache test log.
+FOLD_ROUTINE = _int("FOLD_ROUTINE", 0) == 1
 # The log budget is what is left after the (measured) instructions + template.
 
 # ---- Reliability ----

@@ -191,6 +191,16 @@ After the last slice, `report.py` merges cards that describe one actor and decid
 | Time per slice | about 13 s | 22 to 30 s |
 | Provided log, end to end | about 3 min | about 4 to 5 min |
 
+**Third log**, Linux auth/syslog (`eval/make_syslog.py`), 82 lines of plain text with no HTTP at all: an SSH brute force ending in a root login and a read of `/etc/shadow`, a username sweep, cron noise and one mistyped password.
+
+| Model | Found | Type | Severity | Required lines | False positives |
+|---|---|---|---|---|---|
+| **2B** | **2/2** | **2/2** | **2/2** | **5/5** | **0** |
+
+**Repeatability.** Six reports of the provided log (two web runs, three CLI runs, one run with the model server killed mid-job) list the same findings, types, severities and evidence lines. Two independent full runs produced identical model flags in 14 of 14 slices. The model runs at temperature 0.
+
+**Pre-grouping experiment (`FOLD_ROUTINE=1`).** `app/routine.py` leaves routine browser traffic out of the prompts (GET with a browser user agent, 2xx/3xx, a common path, a plain query). The ledger still counts those lines. On the provided log it cut slices from 14 to 7 and still scored 5/5. On the Apache log it cut 5 slices to 2, and the denser slices made the model miss the sqlmap probes (2/3). A unit test proves the folding never hides an attack line, so the miss comes from slice density. I left it off by default.
+
 ### Test methodology
 
 - I labelled the expected findings by hand in `eval/sample_expected.json`. `eval/make_apache_log.py` generates the second log and its answers from a fixed seed. The app does not read either file.
@@ -223,6 +233,7 @@ Environment variables, read by `app/config.py`:
 | `CALL_TIMEOUT_S` | 180 | timeout per model call |
 | `MAX_ATTEMPTS` | 3 | retries before splitting a slice |
 | `MAX_UPLOAD_BYTES` | 5 MB | upload limit |
+| `FOLD_ROUTINE` | 0 | 1 = leave routine browser page loads out of prompts (see Evaluation) |
 | `LOGSEC_DATA` | `./data` | uploads and the SQLite database |
 
 Detection thresholds live as named constants: `BURST_WINDOW_S` and `LARGE_BYTES` in `ledger.py`, plus the triage and severity rules in `report.py`. The model server flags live in `scripts/start_model.ps1`, with a comment per flag. Two matter for RAM: `--cache-ram 0` disables an 8 GB default prompt cache that pushed RSS to 3.8 GB, and `--ctx-checkpoints 8` lets this hybrid model reuse the 411-token instruction prefix.

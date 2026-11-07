@@ -1,0 +1,68 @@
+{
+ "_note": "Answers for eval/syslog_test.log (generated). Test fixture only.",
+ "expected": [
+  {
+   "name": "SSH brute force -> root login",
+   "actor": "198.51.100.66",
+   "types": [
+    "brute_force",
+    "account_compromise",
+    "unauthorized_access",
+    "data_exfiltration"
+   ],
+   "must_lines": [
+    6,
+    70,
+    75
+   ],
+   "nice_lines": [
+    12,
+    17,
+    22,
+    29,
+    43,
+    50,
+    57,
+    64
+   ],
+   "severity": [
+    "H",
+    "C"
+   ]
+  },
+  {
+   "name": "username enumeration sweep",
+   "actor": "203.0.113.77",
+   "types": [
+    "brute_force",
+    "scanning",
+    "unauthorized_access"
+   ],
+   "must_lines": [
+    36,
+    37
+   ],
+   "nice_lines": [
+    38,
+    39,
+    40,
+    41,
+    42
+   ],
+   "severity": [
+    "L",
+    "M",
+    "H"
+   ]
+  }
+ ],
+ "benign_actors": [
+  "10.0.0.12",
+  "10.0.0.21",
+  "192.0.2.250"
+ ],
+ "benign_lines": [
+  62,
+  63
+ ]
+}

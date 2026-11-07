@@ -34,6 +34,11 @@ class Rendered:
     tokens: int
     duplicate_of: int | None = None  # first line of the identical earlier entry
     raw_hash: str = field(default="", repr=False)
+    routine: bool = False  # folded: counted by the ledger, not shown to the model (app/routine.py)
+
+    @property
+    def cost(self) -> int:
+        return 0 if self.routine else self.tokens
 
 
 def render_all(path: str, fmt: str, entries: list[Entry], count_tokens: Callable[[str], int],
@@ -58,14 +63,18 @@ def render_all(path: str, fmt: str, entries: list[Entry], count_tokens: Callable
     return out
 
 
+FOLD_NOTE_TOKENS = 24  # room for the "(N routine requests omitted)" line
+
+
 def plan_chunks(rendered: list[Rendered], budget: int) -> list[Chunk]:
+    budget -= FOLD_NOTE_TOKENS if any(r.routine for r in rendered) else 0
     chunks: list[Chunk] = []
     start, used = 0, 0
     for i, r in enumerate(rendered):
-        if used + r.tokens > budget and i > start:
+        if used + r.cost > budget and i > start:
             chunks.append(_make(len(chunks), rendered, start, i, used))
             start, used = i, 0
-        used += r.tokens
+        used += r.cost
     if start < len(rendered):
         chunks.append(_make(len(chunks), rendered, start, len(rendered), used))
     return chunks
@@ -76,4 +85,13 @@ def _make(idx: int, rendered: list[Rendered], start: int, end: int, used: int) -
 
 
 def chunk_text(rendered: list[Rendered], chunk: Chunk) -> str:
-    return "\n".join(r.text for r in rendered[chunk.entry_start:chunk.entry_end])
+    part = rendered[chunk.entry_start:chunk.entry_end]
+    lines = [r.text for r in part if not r.routine]
+    folded = sum(r.routine for r in part)
+    if folded:
+        lines.append(f"({folded} routine browser page loads in L{chunk.first_line}-L{chunk.last_line} omitted)")
+    return "\n".join(lines)
+
+
+def has_content(rendered: list[Rendered], chunk: Chunk) -> bool:
+    return any(not r.routine for r in rendered[chunk.entry_start:chunk.entry_end])
